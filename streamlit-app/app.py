@@ -55,11 +55,14 @@ st.markdown("""
             border-radius: 16px;
             box-shadow: 5px 5px 15px #e8e9eb, -5px -5px 15px #ffffff;
             border: 1px solid rgba(255,255,255,0.18);
+            border-left: 4px solid #2c4356;
             transition: all 0.3s ease;
         }
         .stMetric:hover {
             transform: translateY(-5px);
             box-shadow: 8px 8px 20px #e8e9eb, -8px -8px 20px #ffffff;
+            border: 1px solid #2c4356;
+            border-left: 4px solid #2c4356;
         }
         .stMetric label {
             color: #5b7a95;
