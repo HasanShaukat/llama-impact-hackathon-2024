@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import os
-from openai import OpenAI
+from together import Together
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -97,11 +97,11 @@ def load_data():
     return df
 
 @st.cache_resource
-def init_openai():
-    return OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+def init_together():
+    return Together(api_key=os.getenv('TOGETHER_API_KEY'))
 
 df = load_data()
-client = init_openai()
+client = init_together()
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -318,14 +318,15 @@ with tab2:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
                     messages=[
                         {"role": "system", "content": """You are an analyst for the Kosovo Municipality Complaints system.
                          Analyze the provided complaints data and answer questions clearly and concisely.
                          Focus on providing actionable insights and clear patterns in the data."""},
                         {"role": "user", "content": f"Based on this data:\n{context}\n\nQuestion: {prompt}"}
                     ],
-                    temperature=0.3
+                    temperature=0.3,
+                    max_tokens=1000
                 )
                 response_content = response.choices[0].message.content
                 st.markdown(response_content)
