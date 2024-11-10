@@ -353,7 +353,7 @@ with tab1:
 
     # Detailed complaints table
     st.subheader("Detailed Complaints")
-    cols_to_show = ['date', 'municipality', 'category', 'complaint_severity', 'complaint_en']
+    cols_to_show = ['date', 'municipality', 'category', 'complaint_severity', 'complaint_en','user_text_en','image_description']
     st.dataframe(
         filtered_df[cols_to_show].sort_values('date', ascending=False),
         use_container_width=True,
@@ -402,7 +402,7 @@ with tab2:
         - Average severity: {filtered_df['complaint_severity'].mean():.2f}
         
         Detailed complaints:
-        {filtered_df[['date', 'municipality', 'category', 'complaint_severity', 'complaint_en']].to_string()}
+        {filtered_df[['date', 'municipality', 'category', 'complaint_severity', 'user_text_en']].to_string()}
         """
 
         # Display assistant response
