@@ -165,7 +165,7 @@ tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Complaint Copilot"])
 @st.cache_data
 def load_data():
     df = pd.read_csv("sample_data.csv")
-    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = pd.to_datetime(df['date_created'])
     return df
 
 @st.cache_resource
@@ -236,10 +236,10 @@ with tab1:
     with col1:
         st.metric("Total Complaints", len(filtered_df))
     with col2:
-        avg_severity = round(filtered_df['severity_score'].mean(), 2)
+        avg_severity = round(filtered_df['complaint_severity'].mean(), 2)
         st.metric("Average Severity", avg_severity)
     with col3:
-        high_severity = len(filtered_df[filtered_df['severity_score'] >= 7])
+        high_severity = len(filtered_df[filtered_df['complaint_severity'] >= 7])
         st.metric("High Severity Cases", high_severity)
     with col4:
         municipalities_count = filtered_df['municipality'].nunique()
@@ -306,16 +306,16 @@ with tab1:
 
     with col1:
         # Severity distribution
-        fig = px.histogram(filtered_df, x='severity_score',
+        fig = px.histogram(filtered_df, x='complaint_severity',
                         title='Severity Score Distribution Analysis',
-                        labels={'severity_score': 'Severity Score', 'count': 'Number of Complaints'},
+                        labels={'complaint_severity': 'Severity Score', 'count': 'Number of Complaints'},
                         nbins=20,
                         color_discrete_sequence=['#3498db'])
         
-        fig.add_vline(x=filtered_df['severity_score'].mean(), 
+        fig.add_vline(x=filtered_df['complaint_severity'].mean(), 
                     line_dash="dash", 
                     line_color="red",
-                    annotation_text=f"Mean: {filtered_df['severity_score'].mean():.2f}")
+                    annotation_text=f"Mean: {filtered_df['complaint_severity'].mean():.2f}")
         
         fig.update_layout(
             height=400,
@@ -329,7 +329,7 @@ with tab1:
     with col2:
         # Municipality comparison
         municipality_stats = filtered_df.groupby('municipality').agg({
-            'severity_score': ['mean', 'count']
+            'complaint_severity': ['mean', 'count']
         }).reset_index()
         municipality_stats.columns = ['municipality', 'avg_severity', 'complaint_count']
         municipality_stats = municipality_stats.sort_values('avg_severity', ascending=True)
@@ -353,7 +353,7 @@ with tab1:
 
     # Detailed complaints table
     st.subheader("Detailed Complaints")
-    cols_to_show = ['date', 'municipality', 'category', 'severity_score', 'complaint_en']
+    cols_to_show = ['date', 'municipality', 'category', 'complaint_severity', 'complaint_en']
     st.dataframe(
         filtered_df[cols_to_show].sort_values('date', ascending=False),
         use_container_width=True,
@@ -399,10 +399,10 @@ with tab2:
         - Total complaints: {len(filtered_df)}
         - Categories: {', '.join(filtered_df['category'].unique())}
         - Municipalities: {', '.join(filtered_df['municipality'].unique())}
-        - Average severity: {filtered_df['severity_score'].mean():.2f}
+        - Average severity: {filtered_df['complaint_severity'].mean():.2f}
         
         Detailed complaints:
-        {filtered_df[['date', 'municipality', 'category', 'severity_score', 'complaint_en']].to_string()}
+        {filtered_df[['date', 'municipality', 'category', 'complaint_severity', 'complaint_en']].to_string()}
         """
 
         # Display assistant response
