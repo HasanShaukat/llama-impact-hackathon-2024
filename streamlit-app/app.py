@@ -29,15 +29,19 @@ st.markdown("""
 st.markdown("""
     <style>
         .main {
-            padding: 0rem 1rem;
+            padding: 1rem 2rem;
             background-color: white;
         }
         .stMetric {
             background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             border-left: 5px solid #4CAF50;
+            transition: transform 0.2s ease;
+        }
+        .stMetric:hover {
+            transform: translateY(-2px);
         }
         .stMetric label {
             color: #495057;
