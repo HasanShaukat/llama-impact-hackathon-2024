@@ -86,6 +86,7 @@ st.markdown("""
 # Title
 st.title("🏛️ Kosovo Municipality Complaints Dashboard")
 
+
 # Create tabs
 tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Q&A Interface"])
 
@@ -281,6 +282,7 @@ with tab1:
 
 # Tab 2 - Q&A Interface
 with tab2:
+    prompt = st.chat_input("Ask a question about the complaints data")
     st.markdown("### Chat with AI About the Complaints Data")
     
     # Initialize chat history
@@ -293,7 +295,7 @@ with tab2:
             st.markdown(message["content"])
 
     # Chat input
-    if prompt := st.chat_input("Ask a question about the complaints data"):
+    if prompt:
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         
@@ -318,7 +320,7 @@ with tab2:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 response = client.chat.completions.create(
-                    model="meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
+                    model="meta-llama/Llama-3-8b-chat-hf",
                     messages=[
                         {"role": "system", "content": """You are an analyst for the Kosovo Municipality Complaints system.
                          Analyze the provided complaints data and answer questions clearly and concisely.
