@@ -153,17 +153,17 @@ st.subheader("Complaint Analytics")
 col1, col2 = st.columns(2)
 
 with col1:
-    # Time series of complaints with trend
-    daily_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='D')).size().reset_index(name='count')
-    fig = px.line(daily_complaints, x='date', y='count',
-                  title='Daily Complaints Trend Analysis',
-                  labels={'count': 'Number of Complaints', 'date': 'Date'})
+    # Time series of complaints with trend (Monthly)
+    monthly_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='M')).size().reset_index(name='count')
+    fig = px.line(monthly_complaints, x='date', y='count',
+                  title='Monthly Complaints Trend Analysis',
+                  labels={'count': 'Number of Complaints', 'date': 'Month'})
     
-    # Format x-axis to show dates properly
+    # Format x-axis to show months properly
     fig.update_xaxes(
-        tickformat="%Y-%m-%d",
+        tickformat="%B %Y",
         tickmode='auto',
-        nticks=10
+        nticks=12
     )
     
     # Add trend line
