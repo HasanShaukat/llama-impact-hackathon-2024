@@ -203,7 +203,7 @@ with col1:
             x=1
         )
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="daily_complaints_1")
 
 with col2:
     # Category distribution with better styling
@@ -221,7 +221,7 @@ with col2:
         legend=dict(orientation="h", y=-0.2)
     )
     fig.update_traces(textposition='inside', textinfo='percent+label')
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="category_dist_1")
 
 # Row 2 - Severity distribution and municipality comparison
 col1, col2 = st.columns(2)
@@ -246,7 +246,7 @@ with col1:
         bargap=0.1,
         showlegend=False
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="severity_dist_1")
 
 with col2:
     # Enhanced municipality comparison
@@ -271,7 +271,7 @@ with col2:
         title_x=0.5,
         coloraxis_colorbar_title="Number of Complaints"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="municipality_analysis_1")
 
 # Tab 1 - Analytics Dashboard
 with tab1:
@@ -327,7 +327,7 @@ with tab1:
                 x=1
             )
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="daily_complaints_2")
 
     with col2:
         # Category distribution
@@ -345,7 +345,7 @@ with tab1:
             legend=dict(orientation="h", y=-0.2)
         )
         fig.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="category_dist_2")
 
     # Row 2 - Severity distribution and municipality comparison
     col1, col2 = st.columns(2)
@@ -370,7 +370,7 @@ with tab1:
             bargap=0.1,
             showlegend=False
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="severity_dist_2")
 
     with col2:
         # Municipality comparison
@@ -395,7 +395,7 @@ with tab1:
             title_x=0.5,
             coloraxis_colorbar_title="Number of Complaints"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="municipality_analysis_2")
 
     # Detailed complaints table
     st.subheader("Detailed Complaints")
