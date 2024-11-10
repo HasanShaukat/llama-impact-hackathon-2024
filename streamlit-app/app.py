@@ -168,9 +168,9 @@ with col1:
     
     # Add trend line
     fig.add_trace(go.Scatter(
-        x=daily_complaints['date'],
-        y=daily_complaints['count'].rolling(window=7).mean(),
-        name='7-day Moving Average',
+        x=monthly_complaints['date'],
+        y=monthly_complaints['count'].rolling(window=3).mean(),
+        name='3-month Moving Average',
         line=dict(color='red', dash='dash')
     ))
     
