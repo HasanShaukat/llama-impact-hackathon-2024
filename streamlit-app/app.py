@@ -3,6 +3,12 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Set page config
 st.set_page_config(
@@ -77,18 +83,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Title and description
+# Title
 st.title("🏛️ Kosovo Municipality Complaints Dashboard")
-st.markdown("Interactive analytics dashboard for monitoring and analyzing public complaints")
 
-# Load data
+# Create tabs
+tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Q&A Interface"])
+
+with tab1:
+    st.markdown("Interactive analytics dashboard for monitoring and analyzing public complaints")
+
+# Load data and initialize OpenAI
 @st.cache_data
 def load_data():
     df = pd.read_csv("sample_data.csv")
     df['date'] = pd.to_datetime(df['date'])
     return df
 
+@st.cache_resource
+def init_openai():
+    return OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
 df = load_data()
+client = init_openai()
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -261,10 +277,57 @@ with col2:
     st.plotly_chart(fig, use_container_width=True)
 
 # Detailed complaints table
-st.subheader("Detailed Complaints")
-cols_to_show = ['date', 'municipality', 'category', 'severity_score', 'complaint_en']
-st.dataframe(
-    filtered_df[cols_to_show].sort_values('date', ascending=False),
-    use_container_width=True,
-    height=400
-)
+with tab1:
+    st.subheader("Detailed Complaints")
+    cols_to_show = ['date', 'municipality', 'category', 'severity_score', 'complaint_en']
+    st.dataframe(
+        filtered_df[cols_to_show].sort_values('date', ascending=False),
+        use_container_width=True,
+        height=400
+    )
+
+with tab2:
+    st.markdown("### Ask Questions About the Complaints Data")
+    
+    # Question input
+    question_type = st.radio(
+        "Choose question type:",
+        ["Generate Summary", "Custom Question"],
+        horizontal=True
+    )
+    
+    if question_type == "Generate Summary":
+        question = "Provide a concise summary of the complaints data, including main categories, severity trends, and key insights."
+    else:
+        question = st.text_input(
+            "Ask a question about the complaints:",
+            placeholder="Example: What are the most common types of complaints?"
+        )
+    
+    if question:
+        # Create context from filtered data
+        context = f"""
+        Analysis context:
+        - Time period: {date_range[0]} to {date_range[1]}
+        - Total complaints: {len(filtered_df)}
+        - Categories: {', '.join(filtered_df['category'].unique())}
+        - Municipalities: {', '.join(filtered_df['municipality'].unique())}
+        - Average severity: {filtered_df['severity_score'].mean():.2f}
+        
+        Detailed complaints:
+        {filtered_df[['date', 'municipality', 'category', 'severity_score', 'complaint_en']].to_string()}
+        """
+        
+        if st.button("Generate Response"):
+            with st.spinner("Analyzing complaints data..."):
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": """You are an analyst for the Kosovo Municipality Complaints system.
+                         Analyze the provided complaints data and answer questions clearly and concisely.
+                         Focus on providing actionable insights and clear patterns in the data."""},
+                        {"role": "user", "content": f"Based on this data:\n{context}\n\nQuestion: {question}"}
+                    ],
+                    temperature=0.3
+                )
+                st.write(response.choices[0].message.content)
