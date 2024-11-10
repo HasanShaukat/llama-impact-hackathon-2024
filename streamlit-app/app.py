@@ -6,52 +6,69 @@ from datetime import datetime
 
 # Set page config
 st.set_page_config(
-    page_title="Kosovo Municipality Complaints Dashboard",
+    page_title="Kosovo Municipality Complaints Dashboard", 
     page_icon="🏛️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
 )
 
-# Custom CSS
+# Ensure light theme
+st.markdown("""
+    <script>
+        var elements = window.parent.document.getElementsByTagName('html');
+        elements[0].setAttribute('data-theme', 'light');
+    </script>
+    """, unsafe_allow_html=True)
+
+# Custom CSS for light theme
 st.markdown("""
     <style>
         .main {
             padding: 0rem 1rem;
-            background-color: #f8f9fa;
+            background-color: white;
         }
         .stMetric {
-            background-color: white;
+            background-color: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
             border-left: 5px solid #4CAF50;
         }
         .stMetric label {
-            color: #666;
+            color: #495057;
             font-size: 0.875rem;
         }
         .stMetric .value {
-            color: #2c3e50;
+            color: #212529;
             font-size: 1.5rem;
             font-weight: bold;
         }
         .stPlotlyChart {
-            background-color: white;
+            background-color: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
         }
         .stSelectbox, .stMultiSelect {
-            background-color: white;
+            background-color: #f8f9fa;
             border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
         }
         h1, h2, h3 {
-            color: #2c3e50;
+            color: #212529;
         }
         .stSidebar {
-            background-color: #f8f9fa;
+            background-color: white;
             padding: 2rem 1rem;
+            border-right: 1px solid #dee2e6;
+        }
+        .stDataFrame {
+            background-color: #f8f9fa;
         }
     </style>
 """, unsafe_allow_html=True)
