@@ -89,9 +89,6 @@ st.title("🏛️ Kosovo Municipality Complaints Dashboard")
 # Create tabs
 tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Q&A Interface"])
 
-with tab1:
-    st.markdown("Interactive analytics dashboard for monitoring and analyzing public complaints")
-
 # Load data and initialize OpenAI
 @st.cache_data
 def load_data():
@@ -276,8 +273,131 @@ with col2:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Detailed complaints table
+# Tab 1 - Analytics Dashboard
 with tab1:
+    st.markdown("### Interactive Analytics Dashboard")
+    
+    # Top metrics
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Complaints", len(filtered_df))
+    with col2:
+        avg_severity = round(filtered_df['severity_score'].mean(), 2)
+        st.metric("Average Severity", avg_severity)
+    with col3:
+        high_severity = len(filtered_df[filtered_df['severity_score'] >= 7])
+        st.metric("High Severity Cases", high_severity)
+    with col4:
+        municipalities_count = filtered_df['municipality'].nunique()
+        st.metric("Municipalities", municipalities_count)
+
+    # Charts
+    st.subheader("Complaint Analytics")
+
+    # Row 1 - Time series and category distribution
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Time series of complaints with trend (Daily)
+        daily_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='D')).size().reset_index(name='count')
+        fig = px.line(daily_complaints, x='date', y='count',
+                    title='Daily Complaints Trend Analysis',
+                    labels={'count': 'Number of Complaints', 'date': 'Date'})
+        
+        fig.update_traces(line=dict(color='#2E86C1', width=2))
+        fig.update_xaxes(tickformat="%Y-%m-%d", tickmode='auto', nticks=10)
+        
+        fig.add_trace(go.Scatter(
+            x=daily_complaints['date'],
+            y=daily_complaints['count'].rolling(window=7).mean(),
+            name='7-day Moving Average',
+            line=dict(color='#E74C3C', width=2, dash='dash')
+        ))
+        
+        fig.update_layout(
+            height=400,
+            template='plotly_white',
+            hovermode='x unified',
+            title_x=0.5,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        # Category distribution
+        category_counts = filtered_df['category'].value_counts()
+        fig = px.pie(values=category_counts.values,
+                    names=category_counts.index,
+                    title='Complaint Categories Distribution',
+                    hole=0.4,
+                    color_discrete_sequence=px.colors.qualitative.Set3)
+        
+        fig.update_layout(
+            height=400,
+            template='plotly_white',
+            title_x=0.5,
+            legend=dict(orientation="h", y=-0.2)
+        )
+        fig.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Row 2 - Severity distribution and municipality comparison
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Severity distribution
+        fig = px.histogram(filtered_df, x='severity_score',
+                        title='Severity Score Distribution Analysis',
+                        labels={'severity_score': 'Severity Score', 'count': 'Number of Complaints'},
+                        nbins=20,
+                        color_discrete_sequence=['#3498db'])
+        
+        fig.add_vline(x=filtered_df['severity_score'].mean(), 
+                    line_dash="dash", 
+                    line_color="red",
+                    annotation_text=f"Mean: {filtered_df['severity_score'].mean():.2f}")
+        
+        fig.update_layout(
+            height=400,
+            template='plotly_white',
+            title_x=0.5,
+            bargap=0.1,
+            showlegend=False
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        # Municipality comparison
+        municipality_stats = filtered_df.groupby('municipality').agg({
+            'severity_score': ['mean', 'count']
+        }).reset_index()
+        municipality_stats.columns = ['municipality', 'avg_severity', 'complaint_count']
+        municipality_stats = municipality_stats.sort_values('avg_severity', ascending=True)
+
+        fig = px.bar(municipality_stats, 
+                    x='avg_severity',
+                    y='municipality',
+                    title='Municipality Severity Analysis',
+                    labels={'avg_severity': 'Average Severity Score', 'municipality': 'Municipality'},
+                    orientation='h',
+                    color='complaint_count',
+                    color_continuous_scale='Viridis')
+        
+        fig.update_layout(
+            height=400,
+            template='plotly_white',
+            title_x=0.5,
+            coloraxis_colorbar_title="Number of Complaints"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Detailed complaints table
     st.subheader("Detailed Complaints")
     cols_to_show = ['date', 'municipality', 'category', 'severity_score', 'complaint_en']
     st.dataframe(
@@ -286,25 +406,28 @@ with tab1:
         height=400
     )
 
+# Tab 2 - Q&A Interface
 with tab2:
-    st.markdown("### Ask Questions About the Complaints Data")
+    st.markdown("### Chat with AI About the Complaints Data")
     
-    # Question input
-    question_type = st.radio(
-        "Choose question type:",
-        ["Generate Summary", "Custom Question"],
-        horizontal=True
-    )
-    
-    if question_type == "Generate Summary":
-        question = "Provide a concise summary of the complaints data, including main categories, severity trends, and key insights."
-    else:
-        question = st.text_input(
-            "Ask a question about the complaints:",
-            placeholder="Example: What are the most common types of complaints?"
-        )
-    
-    if question:
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Chat input
+    if prompt := st.chat_input("Ask a question about the complaints data"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
         # Create context from filtered data
         context = f"""
         Analysis context:
@@ -317,17 +440,22 @@ with tab2:
         Detailed complaints:
         {filtered_df[['date', 'municipality', 'category', 'severity_score', 'complaint_en']].to_string()}
         """
-        
-        if st.button("Generate Response"):
-            with st.spinner("Analyzing complaints data..."):
+
+        # Display assistant response
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": """You are an analyst for the Kosovo Municipality Complaints system.
                          Analyze the provided complaints data and answer questions clearly and concisely.
                          Focus on providing actionable insights and clear patterns in the data."""},
-                        {"role": "user", "content": f"Based on this data:\n{context}\n\nQuestion: {question}"}
+                        {"role": "user", "content": f"Based on this data:\n{context}\n\nQuestion: {prompt}"}
                     ],
                     temperature=0.3
                 )
-                st.write(response.choices[0].message.content)
+                response_content = response.choices[0].message.content
+                st.markdown(response_content)
+                
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response_content})
