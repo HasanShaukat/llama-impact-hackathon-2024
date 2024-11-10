@@ -154,10 +154,17 @@ col1, col2 = st.columns(2)
 
 with col1:
     # Time series of complaints with trend
-    daily_complaints = filtered_df.groupby(filtered_df['date'].dt.date).size().reset_index(name='count')
+    daily_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='D')).size().reset_index(name='count')
     fig = px.line(daily_complaints, x='date', y='count',
                   title='Daily Complaints Trend Analysis',
                   labels={'count': 'Number of Complaints', 'date': 'Date'})
+    
+    # Format x-axis to show dates properly
+    fig.update_xaxes(
+        tickformat="%Y-%m-%d",
+        tickmode='auto',
+        nticks=10
+    )
     
     # Add trend line
     fig.add_trace(go.Scatter(
