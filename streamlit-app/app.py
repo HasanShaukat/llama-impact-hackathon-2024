@@ -153,25 +153,28 @@ st.subheader("Complaint Analytics")
 col1, col2 = st.columns(2)
 
 with col1:
-    # Time series of complaints with trend (Monthly)
-    monthly_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='M')).size().reset_index(name='count')
-    fig = px.line(monthly_complaints, x='date', y='count',
-                  title='Monthly Complaints Trend Analysis',
-                  labels={'count': 'Number of Complaints', 'date': 'Month'})
+    # Time series of complaints with trend (Daily)
+    daily_complaints = filtered_df.groupby(pd.Grouper(key='date', freq='D')).size().reset_index(name='count')
+    fig = px.line(daily_complaints, x='date', y='count',
+                  title='Daily Complaints Trend Analysis',
+                  labels={'count': 'Number of Complaints', 'date': 'Date'})
     
-    # Format x-axis to show months properly
+    # Update line color and thickness
+    fig.update_traces(line=dict(color='#2E86C1', width=2))
+    
+    # Format x-axis to show dates properly
     fig.update_xaxes(
-        tickformat="%B %Y",
+        tickformat="%Y-%m-%d",
         tickmode='auto',
-        nticks=12
+        nticks=10
     )
     
     # Add trend line
     fig.add_trace(go.Scatter(
-        x=monthly_complaints['date'],
-        y=monthly_complaints['count'].rolling(window=3).mean(),
-        name='3-month Moving Average',
-        line=dict(color='red', dash='dash')
+        x=daily_complaints['date'],
+        y=daily_complaints['count'].rolling(window=7).mean(),
+        name='7-day Moving Average',
+        line=dict(color='#E74C3C', width=2, dash='dash')
     ))
     
     fig.update_layout(
