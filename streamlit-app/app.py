@@ -12,14 +12,14 @@ load_dotenv()
 
 # Set page config
 st.set_page_config(
-    page_title="Kosovo Municipality Complaints Dashboard", 
+    page_title="Municipality Insights Hub", 
     page_icon="🏛️",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
         'Get Help': None,
         'Report a bug': None,
-        'About': None
+        'About': "Municipality Insights Hub - Powered by AI"
     }
 )
 
@@ -31,64 +31,132 @@ st.markdown("""
     </script>
     """, unsafe_allow_html=True)
 
-# Custom CSS for light theme
+# Custom CSS for modern theme
 st.markdown("""
     <style>
+        /* Global Styles */
         .main {
-            padding: 1rem 2rem;
-            background-color: white;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 2rem;
+            font-family: 'Inter', sans-serif;
         }
+        
+        /* Header Styles */
+        h1, h2, h3 {
+            color: #2c4356;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        /* Metric Card Styles */
         .stMetric {
-            background-color: #f8f9fa;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 5px solid #4CAF50;
-            transition: transform 0.2s ease;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 5px 5px 15px #e8e9eb, -5px -5px 15px #ffffff;
+            border: 1px solid rgba(255,255,255,0.18);
+            transition: all 0.3s ease;
         }
         .stMetric:hover {
-            transform: translateY(-2px);
+            transform: translateY(-5px);
+            box-shadow: 8px 8px 20px #e8e9eb, -8px -8px 20px #ffffff;
         }
         .stMetric label {
-            color: #495057;
-            font-size: 0.875rem;
+            color: #5b7a95;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .stMetric .value {
-            color: #212529;
-            font-size: 1.5rem;
-            font-weight: bold;
+            color: #2c4356;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
         }
+        
+        /* Chart Styles */
         .stPlotlyChart {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.18);
+            margin: 1rem 0;
         }
-        .stSelectbox, .stMultiSelect {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-        }
-        h1, h2, h3 {
-            color: #212529;
-        }
+        
+        /* Sidebar Styles */
         .stSidebar {
-            background-color: white;
-            padding: 2rem 1rem;
-            border-right: 1px solid #dee2e6;
+            background: linear-gradient(180deg, #2c4356 0%, #435668 100%);
+            padding: 2rem 1.5rem;
+            color: white;
         }
+        .stSidebar [data-testid="stMarkdownContainer"] {
+            color: #ffffff;
+        }
+        .stSidebar .stSelectbox, .stSidebar .stMultiSelect {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Input Elements */
+        .stSelectbox, .stMultiSelect {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        
+        /* DataFrame Styling */
         .stDataFrame {
-            background-color: #f8f9fa;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 1rem;
+        }
+        
+        /* Chat Interface Styling */
+        .stChatMessage {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Button Styling */
+        .stButton button {
+            background: linear-gradient(135deg, #2c4356 0%, #435668 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .stButton button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44,67,86,0.2);
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Title
-st.title("🏛️ Kosovo Municipality Complaints Dashboard")
+# Title with custom HTML
+st.markdown("""
+    <div style='text-align: center; padding: 2rem 0;'>
+        <h1 style='color: #2c4356; font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;'>
+            🏛️ Municipality Insights Hub
+        </h1>
+        <p style='color: #5b7a95; font-size: 1.1rem; font-weight: 400;'>
+            Transforming Municipal Feedback into Actionable Intelligence
+        </p>
+    </div>
+""", unsafe_allow_html=True)
 
-
-# Create tabs
-tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Q&A Interface"])
+# Create tabs with modern naming
+tab1, tab2 = st.tabs(["📊 Analytics Dashboard", "🤖 Complaint Copilot"])
 
 # Load data and initialize OpenAI
 @st.cache_data
@@ -149,7 +217,16 @@ filtered_df = df[mask]
 
 # Tab 1 - Analytics Dashboard
 with tab1:
-    st.markdown("### Interactive Analytics Dashboard")
+    st.markdown("""
+        <div style='text-align: center; margin-bottom: 2rem;'>
+            <h3 style='color: #2c4356; font-size: 1.8rem; font-weight: 600;'>
+                Interactive Analytics Dashboard
+            </h3>
+            <p style='color: #5b7a95; font-size: 1rem;'>
+                Real-time insights and analysis of municipal feedback
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     
     # Top metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -283,7 +360,16 @@ with tab1:
 # Tab 2 - Q&A Interface
 with tab2:
     prompt = st.chat_input("Ask a question about the complaints data")
-    st.markdown("### Chat with AI About the Complaints Data")
+    st.markdown("""
+        <div style='text-align: center; margin-bottom: 2rem;'>
+            <h3 style='color: #2c4356; font-size: 1.8rem; font-weight: 600;'>
+                Complaint Copilot
+            </h3>
+            <p style='color: #5b7a95; font-size: 1rem;'>
+                Your AI-powered assistant for deep complaint analysis
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     
     # Initialize chat history
     if "messages" not in st.session_state:
