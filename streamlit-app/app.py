@@ -1,95 +1,150 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 
 # Set page config
 st.set_page_config(
-    page_title="Complaint Management System",
-    page_icon="📝",
-    layout="wide"
+    page_title="Kosovo Municipality Complaints Dashboard",
+    page_icon="🏛️",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
+# Custom CSS
+st.markdown("""
+    <style>
+        .main {
+            padding: 0rem 1rem;
+        }
+        .stMetric {
+            background-color: #f0f2f6;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .stPlotlyChart {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Title and description
-st.title("Complaint Management System")
-st.markdown("A simple system to manage and track complaints")
+st.title("🏛️ Kosovo Municipality Complaints Dashboard")
+st.markdown("Interactive analytics dashboard for monitoring and analyzing public complaints")
 
-# Sidebar
-st.sidebar.header("Navigation")
-page = st.sidebar.selectbox("Choose a page", ["Submit Complaint", "View Complaints"])
+# Load data
+@st.cache_data
+def load_data():
+    df = pd.read_csv("sample_data.csv")
+    df['date'] = pd.to_datetime(df['date'])
+    return df
 
-if page == "Submit Complaint":
-    st.header("Submit a New Complaint")
-    
-    # Complaint form
-    with st.form("complaint_form"):
-        name = st.text_input("Your Name")
-        email = st.text_input("Email")
-        category = st.selectbox(
-            "Complaint Category",
-            ["Product", "Service", "Staff", "Other"]
-        )
-        severity = st.select_slider(
-            "Severity Level",
-            options=["Low", "Medium", "High", "Critical"]
-        )
-        description = st.text_area("Complaint Description")
-        
-        submitted = st.form_submit_button("Submit Complaint")
-        
-        if submitted:
-            # Create a new complaint entry
-            new_complaint = {
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "name": name,
-                "email": email,
-                "category": category,
-                "severity": severity,
-                "description": description,
-                "status": "New"
-            }
-            
-            # Load existing complaints or create new DataFrame
-            try:
-                df = pd.read_csv("complaints.csv")
-            except FileNotFoundError:
-                df = pd.DataFrame(columns=new_complaint.keys())
-            
-            # Append new complaint
-            df = pd.concat([df, pd.DataFrame([new_complaint])], ignore_index=True)
-            df.to_csv("complaints.csv", index=False)
-            
-            st.success("Complaint submitted successfully!")
+df = load_data()
 
-else:  # View Complaints page
-    st.header("View Complaints")
-    
-    try:
-        # Load and display complaints
-        df = pd.read_csv("complaints.csv")
-        
-        # Filters
-        st.subheader("Filters")
-        col1, col2 = st.columns(2)
-        with col1:
-            category_filter = st.multiselect(
-                "Filter by Category",
-                options=df['category'].unique()
-            )
-        with col2:
-            severity_filter = st.multiselect(
-                "Filter by Severity",
-                options=df['severity'].unique()
-            )
-        
-        # Apply filters
-        filtered_df = df.copy()
-        if category_filter:
-            filtered_df = filtered_df[filtered_df['category'].isin(category_filter)]
-        if severity_filter:
-            filtered_df = filtered_df[filtered_df['severity'].isin(severity_filter)]
-        
-        # Display complaints
-        st.dataframe(filtered_df)
-        
-    except FileNotFoundError:
-        st.info("No complaints submitted yet.")
+# Sidebar filters
+st.sidebar.header("Filters")
+
+# Date range filter
+date_range = st.sidebar.date_input(
+    "Select Date Range",
+    [df['date'].min(), df['date'].max()],
+    min_value=df['date'].min(),
+    max_value=df['date'].max()
+)
+
+# Category filter
+categories = st.sidebar.multiselect(
+    "Select Categories",
+    options=sorted(df['category'].unique()),
+    default=sorted(df['category'].unique())
+)
+
+# Municipality filter
+municipalities = st.sidebar.multiselect(
+    "Select Municipalities",
+    options=sorted(df['municipality'].unique()),
+    default=sorted(df['municipality'].unique())
+)
+
+# Apply filters
+mask = (
+    (df['date'].dt.date >= date_range[0]) & 
+    (df['date'].dt.date <= date_range[1]) &
+    (df['category'].isin(categories)) &
+    (df['municipality'].isin(municipalities))
+)
+filtered_df = df[mask]
+
+# Top metrics
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric("Total Complaints", len(filtered_df))
+with col2:
+    avg_severity = round(filtered_df['severity_score'].mean(), 2)
+    st.metric("Average Severity", avg_severity)
+with col3:
+    high_severity = len(filtered_df[filtered_df['severity_score'] >= 7])
+    st.metric("High Severity Cases", high_severity)
+with col4:
+    municipalities_count = filtered_df['municipality'].nunique()
+    st.metric("Municipalities", municipalities_count)
+
+# Charts
+st.subheader("Complaint Analytics")
+
+# Row 1 - Time series and category distribution
+col1, col2 = st.columns(2)
+
+with col1:
+    # Time series of complaints
+    daily_complaints = filtered_df.groupby('date').size().reset_index(name='count')
+    fig = px.line(daily_complaints, x='date', y='count',
+                  title='Daily Complaints Over Time',
+                  labels={'count': 'Number of Complaints', 'date': 'Date'})
+    fig.update_layout(height=400)
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    # Category distribution
+    category_counts = filtered_df['category'].value_counts()
+    fig = px.pie(values=category_counts.values, 
+                 names=category_counts.index,
+                 title='Complaints by Category')
+    fig.update_layout(height=400)
+    st.plotly_chart(fig, use_container_width=True)
+
+# Row 2 - Severity distribution and municipality comparison
+col1, col2 = st.columns(2)
+
+with col1:
+    # Severity distribution
+    fig = px.histogram(filtered_df, x='severity_score',
+                      title='Distribution of Severity Scores',
+                      labels={'severity_score': 'Severity Score'},
+                      nbins=20)
+    fig.update_layout(height=400)
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    # Municipality comparison
+    municipality_avg_severity = filtered_df.groupby('municipality')['severity_score'].mean().sort_values(ascending=True)
+    fig = px.bar(x=municipality_avg_severity.values,
+                 y=municipality_avg_severity.index,
+                 title='Average Severity by Municipality',
+                 labels={'x': 'Average Severity Score', 'y': 'Municipality'},
+                 orientation='h')
+    fig.update_layout(height=400)
+    st.plotly_chart(fig, use_container_width=True)
+
+# Detailed complaints table
+st.subheader("Detailed Complaints")
+cols_to_show = ['date', 'municipality', 'category', 'severity_score', 'complaint_en']
+st.dataframe(
+    filtered_df[cols_to_show].sort_values('date', ascending=False),
+    use_container_width=True,
+    height=400
+)
