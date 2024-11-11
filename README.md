@@ -50,4 +50,4 @@ Using this definition, we now asked Llama 3.2 90B model as to which level does t
 After assessing the severities of each complaint, it's not time to visualize the data in line, bar, pie charts, and filtering time ranges, complaint categories and municipalities from the filter pane. The urban planning manager could easily see the stats for different issues across different regions, all in one dashboard tab.
 
 #### Chat Conversations with Municipal Complaints Data
-The most modern feature of this entire solution is the ability
+The most modern feature of this entire solution is the ability to ask questions about the complaints under consideration. The urban planning manager can use the same filters for time ranges, regions, and complaint topics, and ask the chatbot to create a summary of all the complaints in the filter criteria. Or the user could ask about a specific question, and the chatbot/Copilot would use all the complaints' text to answer the user's question. This way the urban planning managers would get deepar insights and possible solutions quickly about the pressing topics of urban issues.
